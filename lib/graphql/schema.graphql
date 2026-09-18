@@ -1,0 +1,1304 @@
+directive @upper on FIELD_DEFINITION
+
+directive @mask on FIELD_DEFINITION
+
+"""Exposes a URL that specifies the behavior of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behavior of this scalar."""
+  url: String!
+) on SCALAR
+
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+type accountSelfDeleteReturn {
+  success: Boolean
+}
+
+type accountSelfLoad {
+  account: userAccount
+}
+
+type accountSelfUpdateReturn {
+  success: Boolean
+}
+
+type accountSelfUpdateSettingsReturn {
+  success: Boolean
+}
+
+input accountUpdateData {
+  id: ID!
+  alias: String!
+  gender: String!
+  birthday: String
+  details: userDetailsInput
+  description: userDescriptionInput!
+  settings: userSettingsInput!
+}
+
+type adminAddRoleReturn {
+  success: JSON
+}
+
+type adminAddUserRoleReturn {
+  success: Boolean
+}
+
+type authCheck {
+  authorized: Boolean
+}
+
+type chatLoadConfigReturn {
+  config: JSON
+}
+
+type clientReadDataReturn {
+  success: Boolean
+  data: JSON
+}
+
+type clientStatusReturn {
+  success: Boolean
+  online: Boolean
+  userMeta: clientUserMata
+  internal: Boolean
+  rejected: Boolean
+  clientId: String
+}
+
+type clientUserMata {
+  id: String
+  alias: String
+  avatarUrl: String
+}
+
+type clientWriteDataReturn {
+  success: Boolean
+}
+
+type configImportReturn {
+  success: Boolean
+  configs: JSON
+}
+
+type createAuthTokenReturn {
+  authToken: String
+  success: Boolean
+}
+
+type createDummyUsersReturn {
+  success: Boolean
+}
+
+type cronExecuteReturn {
+  success: Boolean
+  result: JSON
+  id: String
+}
+
+type cronJobListReturn {
+  success: Boolean
+  list: JSON
+}
+
+type cronRunnerListReturn {
+  success: Boolean
+  list: JSON
+}
+
+type currencyGetReturn {
+  amount: String
+  base: String
+  date: DateTime
+  rates: JSON
+}
+
+input currencyParams {
+  base: String!
+  amount: Float
+  symbols: String
+}
+
+scalar DateTime
+
+input dbFilter {
+  field: String!
+  value: String!
+  type: dbFilter_enum!
+}
+
+enum dbFilter_enum {
+  like
+  equals
+}
+
+input dbOrder {
+  field: String!
+  type: dbOrder_enum!
+}
+
+enum dbOrder_enum {
+  asc
+  desc
+}
+
+input dbPagination {
+  limit: Int!
+  offset: Int!
+}
+
+input dbQueryOptions {
+  limit: Int
+  offset: Int
+  filter: [dbFilter]
+  order: [dbOrder]
+}
+
+type dbResourceCreateResult {
+  success: Boolean
+  requestId: String
+}
+
+type dbResourceDeleteResult {
+  success: Boolean
+  requestId: String
+}
+
+type dbResourceReadResult {
+  success: Boolean
+  records: JSON
+  total: Int
+  count: Int
+  requestId: String
+}
+
+type dbResourceWriteResult {
+  success: Boolean
+}
+
+type deleteAllDummyUsersReturn {
+  success: Boolean
+}
+
+type deleteMediaReturn {
+  success: Boolean
+}
+
+type developerTestReturn {
+  success: Boolean
+}
+
+type developerTestSourceReturn {
+  success: Boolean
+  news: JSON
+}
+
+scalar Email
+
+input findOptions {
+  pagination: pagination
+  orderBy: JSON
+  where: JSON
+  select: JSON
+}
+
+type getLocationByCoords {
+  address: getLocationByCoordsAddress
+}
+
+type getLocationByCoordsAddress {
+  city: String
+  state: String
+  country: String
+  postcode: String
+  street: String
+  number: String
+  code: String
+}
+
+type getLocationByIp {
+  ip: String
+  network: String
+  version: String
+  city: String
+  region: String
+  region_code: String
+  country: String
+  country_code: String
+}
+
+type googleAuthAfterReturn {
+  success: Boolean
+  gapi_pxd: String
+  gapi_exd: String
+}
+
+type holidays {
+  items: [holidaysItems]
+}
+
+type holidaysItems {
+  date: String
+  localName: String
+  name: String
+  countryCode: String
+  counties: JSON
+  types: JSON
+}
+
+scalar JSON
+
+type linkCreateReturn {
+  link: String
+  token: String
+  success: Boolean
+}
+
+type linkParseReturn {
+  linkId: String
+  target: String
+  params: JSON
+  query: JSON
+  payload: JSON
+  success: Boolean
+  view: String
+  asEmit: Boolean
+}
+
+type loadNews {
+  type: String
+  nextPage: String
+  articles: [loadNewsArticles]
+}
+
+type loadNewsArticles {
+  title: String
+  topline: String
+  firstSentence: String
+  date: DateTime
+  detailsweb: String
+  breakingNews: Boolean
+  type: String
+  streams: loadNewsArticlesStreams
+  teaserImage: loadNewsArticlesTeaserImage
+  tags: [loadNewsArticlesTags]
+}
+
+type loadNewsArticlesStreams {
+  h264m: String
+}
+
+type loadNewsArticlesTags {
+  tag: String
+}
+
+type loadNewsArticlesTeaserImage {
+  imageVariants: JSON
+}
+
+type locationReverseReturn {
+  success: Boolean
+  type: String
+  properties: JSON
+  geometry: JSON
+  address: String
+}
+
+type mailerSendReturn {
+  success: Boolean
+}
+
+type menuOpenReturn {
+  entries: JSON
+}
+
+type Mutation {
+  DbResourceWrite(alias: String!, records: [JSON!]!): dbResourceWriteResult
+  DbResourceCreate(alias: String!, records: [JSON!]!): dbResourceCreateResult
+  DbResourceDelete(alias: String!, ids: [JSON!]!): dbResourceDeleteResult
+  userCreate(params: userCreateParams!): userCreateReturn
+  userConfirm(token: String): userConfirmReturn
+  userLogin(params: userLoginParams!): userLoginReturn
+  createDummyUsers(count: Int): createDummyUsersReturn
+  deleteAllDummyUsers: deleteAllDummyUsersReturn
+  userPasswordReset(email: String): userPasswordResetReturn
+  userPasswordCreate(password: String, token: String): userPasswordCreateReturn
+  userPasswordChange(userId: String!, currentPassword: String!, newPassword: String!): userPasswordChangeReturn
+  userCreateToken(payload: JSON, expiresIn: String): userCreateTokenReturn
+  userUploadAvatar(file: [Upload]!): userUploadAvatarReturn
+  userUploadTeaser(file: [Upload]!): userUploadTeaserReturn
+  userResetTeaser: userResetTeaserReturn
+  userNotify(broadcast: String, targetId: ID, sourceId: ID, message: String!, title: String, translate: Boolean, flash: Boolean, removable: Boolean, type: String!, open: Boolean, component: String, actions: JSON): userNotifyReturn
+  uploadFile(file: [Upload]!, allowedTypes: [String]!, emitAfterUpload: String, immediately: Boolean): uploadFileReturn
+  createAuthToken(email: String!, password: String!): createAuthTokenReturn
+  timelineEntryViewed(entryId: ID!): timelineEntryViewedReturn
+  timelineUpdateEntry(entryId: ID!, entryData: JSON!): timelineUpdateEntryReturn
+  timelineDeleteEntry(entryId: String!): timelineDeleteEntryReturn
+  timelineCreateEntry(entry: timelineEntryInput!, entryType: String!, files: [Upload], public: Boolean!, draft: Boolean!, anonymize: Boolean!, allowComments: Boolean!, location: timelineLocationInput, search: timelineSearchInput, story: JSON, emotionState: JSON, version: String, pageId: ID, choice: JSON): timelineCreateEntryReturn
+  timelineCommentWrite(entryId: String!, comment: String!): timelineCommentWriteReturn
+  timelineCommentDelete(commentId: String!): timelineCommentDeleteReturn
+  userNotifyClear: userNotifyClearReturn
+  userNotifyDelete(notifyId: String!): userNotifyDeleteReturn
+  userNotifySeen(notifyId: String!): userNotifySeenReturn
+  deleteMedia(id: ID!): deleteMediaReturn
+  sendMail(to: String!, template: String!, context: sendMailContext, subject: String): sendMailReturn
+  linkCreate(json: String!): linkCreateReturn
+  linkParse(token: String!): linkParseReturn
+  adminAddUserRole(userId: ID!, userRole: String!, state: Boolean!): adminAddUserRoleReturn
+  accountSelfUpdate(accountData: accountUpdateData!): accountSelfUpdateReturn
+  accountSelfDelete(userId: String!): accountSelfDeleteReturn
+  accountSelfUpdateSettings(userId: String!, settings: userSettingsInput!): accountSelfUpdateSettingsReturn
+  userDelete(pwd: String!): userDeleteReturn
+  userUpdateSettings(settings: JSON!): userUpdateSettingsReturn
+  userRelationRequest(targetId: ID!): userRelationRequestReturn
+  userRelationCancel(id: ID!): userRelationCancelReturn
+  userRelationAccept(id: ID!): userRelationAcceptReturn
+  userRelationReject(id: ID!): userRelationRejectReturn
+  userRelationBlock(sourceId: ID!, targetId: ID!): userRelationBlockReturn
+  userRelationUnblock(sourceId: ID!, targetId: ID!): userRelationUnblockReturn
+  storageWrite(name: String!, key: String!, data: JSON!, overwrite: Boolean, merge: Boolean, silent: Boolean): storageWriteReturn
+  googleAuthAfter(accessToken: String!, idToken: String!, nonce: String!): googleAuthAfterReturn
+  developerTest(delay: Int): developerTestReturn
+  cronExecute(name: String!): cronExecuteReturn
+  configImport: configImportReturn
+  adminAddRole(userId: ID!, userRole: String!, active: Boolean!): adminAddRoleReturn
+  timelineFixEntries(fixName: String!): timelineFixEntriesReturn
+  timelinePageCreate(values: JSON!, bannerFile: [Upload]): timelinePageCreateReturn
+  timelinePageSave(id: ID!, values: JSON!, bannerFile: [Upload]): timelinePageSaveReturn
+  resumeCreate(values: JSON!): resumeCreateReturn
+  resumeUpdateContent(id: String!, content: JSON!, avatarFile: [Upload]): resumeUpdateContentReturn
+  resumeImportJson(resume: JSON!): resumeImportJsonReturn
+}
+
+enum newsTypes_enum {
+  current
+  alert
+  warning
+}
+
+input pagination {
+  limit: Int
+  offset: Int
+}
+
+scalar Password
+
+type Query {
+  DbResourceRead(alias: String!, pagination: dbPagination, filters: JSON, order: JSON): dbResourceReadResult
+  userLoadConfig: userLoadConfig
+  userGetMeta(userId: String!): userGetMeta
+  userGetInfo(userId: ID!): userGetInfo
+  userLogout: userLogout
+  userCheckAuth(userRole: [String]): userCheckAuth
+  userGetById(id: String!): userGetById
+  userList(pagination: pagination, userType: String): userList
+  userAliasExists(alias: String!): userAliasExists
+  userEmailExists(email: String!): userEmailExists
+  timelineLoadEntry(options: timelineLoadEntryOptions!): timelineLoadEntry
+  timelineListing(options: timelineListingOptions!): timelineListing
+  timelineEntryInfo(entryId: ID!): timelineEntryInfo
+  timelineEntryEdit(entryId: ID!): timelineEntryEdit
+  timelineCommentsListing(entryId: String!, page: Int!): timelineCommentsListing
+  searchConfig: searchConfig
+  singleSearch(alias: String!, query: String, options: JSON): singleSearch
+  search(searchTerm: String!, options: searchOptions!, active: JSON!): search
+  userProfileLoad(userId: String!): userProfileLoad
+  userNotifyState: userNotifyState
+  userNotifyListing(page: Int!): userNotifyListing
+  loadNews: loadNews
+  userMediaListing(pagination: pagination!, mediaType: String): userMediaListing
+  getLocationByCoords(lat: String!, lon: String!): getLocationByCoords
+  getLocationByIp(ip: String!): getLocationByIp
+  holidays(year: Int!, country: String!): holidays
+  authCheck: authCheck
+  accountSelfLoad: accountSelfLoad
+  userComparePassword(pwd: String!): userComparePasswordReturn
+  userHasAccess(role: JSON): userHasAccessReturn
+  userInfoCard(id: ID!): userInfoCardReturn
+  userInfoList(ids: JSON!): userInfoListReturn
+  userRelationState(sourceId: ID, targetId: ID): userRelationStateReturn
+  userRelationList(limit: Int!, offset: Int!): userRelationListReturn
+  tokenValidate(token: String!): tokenValidateReturn
+  templateRender(template: String!, context: JSON): templateRenderReturn
+  storageRead(name: String!, key: String!): storageReadReturn
+  menuOpen: menuOpenReturn
+  locationReverse(lat: String!, lon: String!, save: Boolean): locationReverseReturn
+  mailerSend(to: String!, template: String!, context: JSON, subject: String): mailerSendReturn
+  developerTestSource: developerTestSourceReturn
+  cronJobList: cronJobListReturn
+  cronRunnerList: cronRunnerListReturn
+  clientReadData(dataKey: String!): clientReadDataReturn
+  clientWriteData(dataKey: String!, data: JSON!): clientWriteDataReturn
+  clientStatus(deviceId: String!): clientStatusReturn
+  timelineGlobalState: timelineGlobalStateReturn
+  timelineLoadConfig: timelineLoadConfigReturn
+  timelineLoadPost(entryId: ID!): timelineLoadPostReturn
+  timelinePageLoad(id: ID!): timelinePageLoadReturn
+  resumeList: resumeListReturn
+  resumeLoad(resumeId: String!): resumeLoadReturn
+  currencyGet(params: currencyParams!): currencyGetReturn
+  chatLoadConfig: chatLoadConfigReturn
+}
+
+type resumeCreateReturn {
+  success: Boolean
+  data: JSON
+}
+
+type resumeImportJsonReturn {
+  success: Boolean
+  data: JSON
+}
+
+type resumeListReturn {
+  success: Boolean
+  list: JSON
+}
+
+type resumeLoadReturn {
+  success: Boolean
+  data: JSON
+  params: JSON
+}
+
+type resumeUpdateContentReturn {
+  success: Boolean
+  data: JSON
+}
+
+type search {
+  total: Int
+  hrtime: String
+  groups: JSON
+  isEmpty: Boolean
+  groupsTotal: Int
+  items: [searchItems]
+}
+
+type searchConfig {
+  config: searchConfigConfig
+}
+
+type searchConfigConfig {
+  bundles: [searchConfigConfigBundles]
+}
+
+type searchConfigConfigBundles {
+  label: String
+  alias: String
+  active: Boolean
+  sortOrder: Int
+}
+
+type searchItems {
+  title: String
+  description: String
+  imageUrl: String
+  payload: JSON
+  emit: String
+  component: String
+  tooltip: String
+  date: String
+  group: String
+  route: searchItemsRoute
+}
+
+type searchItemsRoute {
+  path: String
+  query: JSON
+}
+
+input searchOptions {
+  page: Int!
+  limit: Int!
+}
+
+input sendMailContext {
+  content: String
+}
+
+type sendMailReturn {
+  sent: Boolean
+}
+
+type singleSearch {
+  records: JSON
+  success: Boolean
+  payload: JSON
+  total: Int
+  count: Int
+  limit: Int
+}
+
+type storageReadReturn {
+  success: Boolean
+  data: JSON
+  id: String
+  createdAt: String
+  updatedAt: String
+  exists: Boolean
+}
+
+type storageWriteReturn {
+  success: Boolean
+}
+
+enum switch_enum {
+  ON
+  OFF
+}
+
+type templateRenderReturn {
+  success: Boolean
+  html: String
+}
+
+input timelineCategoryInput {
+  value: String
+  label: String
+}
+
+type timelineComment {
+  id: String
+  userId: String
+  entryId: String
+  comment: String
+  canDelete: Boolean
+  createdAt: DateTime
+  creator: timelineCommentCreator
+  isFirst: Boolean
+  isLast: Boolean
+  state: timelineCommentState
+  payload: JSON
+}
+
+type timelineCommentCreator {
+  id: String
+  alias: String
+  avatarUrl: String
+}
+
+type timelineCommentDeleteReturn {
+  success: Boolean
+}
+
+type timelineCommentsListing {
+  success: Boolean
+  total: Int
+  pages: Int
+  hasNextPage: Boolean
+  comments: [timelineCommentsListingComments]
+}
+
+type timelineCommentsListingComments {
+  id: String
+  userId: String
+  entryId: String
+  comment: String
+  canDelete: Boolean
+  createdAt: DateTime
+  creator: timelineCommentsListingCommentsCreator
+  isFirst: Boolean
+  isLast: Boolean
+  state: timelineCommentsListingCommentsState
+  payload: JSON
+}
+
+type timelineCommentsListingCommentsCreator {
+  id: String
+  alias: String
+  avatarUrl: String
+}
+
+type timelineCommentsListingCommentsState {
+  deleted: Boolean
+  busy: Boolean
+}
+
+type timelineCommentState {
+  deleted: Boolean
+  busy: Boolean
+}
+
+type timelineCommentWriteReturn {
+  success: Boolean
+  comment: timelineComment
+}
+
+type timelineCreateEntryReturn {
+  success: Boolean
+}
+
+type timelineDeleteEntryReturn {
+  success: Boolean
+}
+
+type timelineEntryEdit {
+  success: Boolean
+  searchTitle: String
+  searchDescription: String
+  public: Boolean
+  draft: Boolean
+  anonymize: Boolean
+  allowComments: Boolean
+  content: String
+  hasFiles: Boolean
+  story: String
+  category: JSON
+  emotionState: JSON
+}
+
+type timelineEntryInfo {
+  success: Boolean
+  info: timelineEntryInfoInfo
+}
+
+type timelineEntryInfoInfo {
+  comments: timelineEntryInfoInfoComments
+  public: Boolean
+  draft: Boolean
+  anonymize: Boolean
+  allowComments: Boolean
+}
+
+type timelineEntryInfoInfoComments {
+  total: Int
+  active: Boolean
+}
+
+input timelineEntryInput {
+  html: String!
+  title: String
+  category: timelineCategoryInput!
+  tags: [String]
+}
+
+type timelineEntryViewedReturn {
+  success: Boolean
+  viewed: Int
+}
+
+type timelineFixEntriesReturn {
+  success: Boolean
+}
+
+type timelineGlobalStateReturn {
+  entriesTotal: Int
+  clientsTotal: Int
+}
+
+type timelineListing {
+  params: timelineListingParams
+  entries: [timelineListingEntries]
+}
+
+type timelineListingEntries {
+  id: String!
+  entryType: String!
+  lastEntry: Boolean!
+  userId: ID!
+  createdAt: DateTime!
+  payload: JSON!
+  generated: Boolean
+  component: String
+}
+
+input timelineListingOptions {
+  page: Int!
+  type: [String]
+  userId: ID
+  listingId: ID!
+  listingType: String
+  category: String
+  postId: String
+  pageId: String
+  entryId: String
+}
+
+type timelineListingParams {
+  totalEntries: Int
+  totalPages: Int
+  currentPage: Int
+  limit: Int
+  hasNextPage: Boolean
+  single: Boolean
+}
+
+type timelineLoadConfigReturn {
+  config: JSON
+  success: Boolean
+  token: String
+  tokenId: String
+}
+
+type timelineLoadEntry {
+  entry: timelineLoadEntryEntry
+}
+
+type timelineLoadEntryEntry {
+  success: Boolean
+  hrtime: String
+  rules: timelineLoadEntryEntryRules
+  data: timelineLoadEntryEntryData
+}
+
+type timelineLoadEntryEntryData {
+  id: ID
+  version: String
+  classes: JSON
+  styles: JSON
+  userId: ID
+  classesBox: String
+  styleBox: JSON
+  type: String
+  score: Int
+  creator: timelineLoadEntryEntryDataCreator
+  createdAt: DateTime
+  content: String
+  title: String
+  category: timelineLoadEntryEntryDataCategory
+  location: String
+  public: Boolean
+  draft: Boolean
+  anonymize: Boolean
+  files: timelineLoadEntryEntryDataFiles
+  payload: JSON
+  dataPayload: JSON
+  info: timelineLoadEntryEntryDataInfo
+  tags: JSON
+}
+
+type timelineLoadEntryEntryDataCategory {
+  value: String
+  label: String
+}
+
+type timelineLoadEntryEntryDataCreator {
+  alias: String
+  avatarUrl: String
+  exists: Boolean
+}
+
+type timelineLoadEntryEntryDataFiles {
+  images: [timelineLoadEntryEntryDataFilesImages]
+}
+
+type timelineLoadEntryEntryDataFilesImages {
+  url: String
+  altTag: String
+  classes: String
+  orgUrl: String
+  detailsUrl: String
+  type: String
+  mimetype: String
+  payload: JSON
+  thumbUrl: String
+  index: Int
+}
+
+type timelineLoadEntryEntryDataInfo {
+  comments: timelineLoadEntryEntryDataInfoComments
+  public: Boolean
+  draft: Boolean
+  anonymize: Boolean
+  allowComments: Boolean
+  viewed: Int
+}
+
+type timelineLoadEntryEntryDataInfoComments {
+  active: Boolean
+  total: Int
+}
+
+type timelineLoadEntryEntryRules {
+  canDelete: Boolean
+  canEdit: Boolean
+  hasMenu: Boolean
+}
+
+input timelineLoadEntryOptions {
+  entryId: String
+}
+
+type timelineLoadPostReturn {
+  post: JSON
+}
+
+input timelineLocationInput {
+  lat: String
+  lon: String
+}
+
+type timelinePageCreateReturn {
+  success: Boolean
+  entity: JSON
+}
+
+type timelinePageLoadReturn {
+  page: JSON
+  success: Boolean
+  exists: Boolean
+}
+
+type timelinePageSaveReturn {
+  success: Boolean
+  exists: Boolean
+  entity: JSON
+}
+
+input timelineSearchInput {
+  title: String!
+  description: String!
+}
+
+type timelineUpdateEntryReturn {
+  success: Boolean
+  updated: JSON
+}
+
+type tokenValidateReturn {
+  success: Boolean
+  valid: Boolean
+  expired: Boolean
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type uploadFileReturn {
+  result: uploadResult
+}
+
+type uploadResult {
+  uploaded: [uploadResultUploaded]
+}
+
+type uploadResultUploaded {
+  fileId: String
+  success: Boolean
+  errors: [uploadResultUploadedErrors]
+  meta: uploadResultUploadedMeta
+}
+
+type uploadResultUploadedErrors {
+  name: String
+  message: String
+  code: Int
+  payload: JSON
+}
+
+type uploadResultUploadedMeta {
+  directory: String
+  filename: String
+  mimetype: String
+  encoding: String
+  extension: String
+  size: Int
+  relativePath: String
+  relativeDir: String
+  custom: JSON
+}
+
+type userAccount {
+  id: String!
+  alias: String!
+  email: String!
+  userType: String!
+  avatarUrl: String
+  details: userDetails
+  gender: String
+  birthday: String
+  age: Int
+  description: userDescription
+  superUser: Boolean
+  settings: userSettings
+  lastLogin: DateTime
+}
+
+type userAliasExists {
+  exists: Boolean
+}
+
+type userCheckAuth {
+  authorized: Boolean
+  hasPromission: Boolean
+}
+
+type userComparePasswordReturn {
+  success: Boolean
+}
+
+type userConfirmReturn {
+  success: Boolean
+  userId: String
+}
+
+input userCreateParams {
+  alias: String!
+  email: String!
+  password: String!
+}
+
+type userCreateReturn {
+  success: Boolean
+  userId: String
+}
+
+type userCreateTokenReturn {
+  token: String
+  success: Boolean
+}
+
+type userDeleteReturn {
+  success: Boolean
+}
+
+type userDescription {
+  html: String
+}
+
+input userDescriptionInput {
+  html: String!
+}
+
+type userDetails {
+  firstname: String
+  lastname: String
+}
+
+input userDetailsInput {
+  firstname: String
+  lastname: String
+}
+
+type userEmailExists {
+  exists: Boolean
+}
+
+type userGetById {
+  user: userGetByIdUser
+}
+
+type userGetByIdUser {
+  id: String
+  email: String
+  active: Boolean
+  confirmed: Boolean
+  userType: String
+  userRole: JSON
+}
+
+type userGetInfo {
+  success: Boolean
+  info: userGetInfoInfo
+}
+
+type userGetInfoInfo {
+  alias: String
+  avatarUrl: String
+}
+
+type userGetMeta {
+  meta: userMetaData
+}
+
+type userHasAccessReturn {
+  authorized: Boolean
+  permission: Boolean
+}
+
+type userInfoCardReturn {
+  info: JSON
+  success: Boolean
+}
+
+type userInfoListReturn {
+  infoList: JSON
+  success: Boolean
+  count: Int
+}
+
+type userList {
+  total: Int
+  records: [userListRecords]
+}
+
+type userListRecords {
+  id: ID
+  alias: String
+  email: String
+  userType: String
+  gender: String
+  birthday: DateTime
+  lastLogin: DateTime
+  superUser: Boolean
+  avatarUrl: String
+}
+
+type userLoadConfig {
+  authorized: Boolean
+  meta: userMetaData
+  userId: String
+  refreshToken: String
+}
+
+input userLoginParams {
+  email: String!
+  password: String!
+  userType: String
+}
+
+type userLoginReturn {
+  success: Boolean
+  authToken: String
+  userId: String
+  meta: userMetaData
+}
+
+type userLogout {
+  success: Boolean
+}
+
+type userMediaListing {
+  total: Int
+  limit: Int
+  offset: Int
+  records: [userMediaListingRecords]
+}
+
+type userMediaListingRecords {
+  id: String
+  userId: String
+  fileId: String
+  type: String
+  url: String
+  extension: String
+  resources: JSON
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type userMetaData {
+  id: String
+  email: String
+  alias: String
+  avatarUrl: String
+  teaserUrl: String
+  role: JSON
+  settings: userSettings
+  lastLogin: DateTime
+  superUser: Boolean
+  userType: String
+}
+
+type userNotifyClearReturn {
+  success: Boolean
+  state: userNotifyClearReturnState
+}
+
+type userNotifyClearReturnState {
+  total: Int
+  hasNew: Boolean
+}
+
+type userNotifyDeleteReturn {
+  success: Boolean
+  state: userNotifyDeleteReturnState
+}
+
+type userNotifyDeleteReturnState {
+  total: Int
+  hasNew: Boolean
+}
+
+type userNotifyListing {
+  success: Boolean
+  total: Int
+  hasNextPage: Boolean
+  records: [userNotifyListingRecords]
+}
+
+type userNotifyListingRecords {
+  notifyId: String
+  title: String
+  message: String
+  type: String
+  date: DateTime
+  from: userNotifyListingRecordsFrom
+  removable: Boolean
+  translate: Boolean
+  seen: Boolean
+  payload: JSON
+  component: String
+  isLast: Boolean
+  actions: [userNotifyListingRecordsActions]
+}
+
+type userNotifyListingRecordsActions {
+  label: String
+  emit: String
+  payload: JSON
+  variant: String
+  close: String
+  delete: Boolean
+}
+
+type userNotifyListingRecordsFrom {
+  alias: String
+  avatarUrl: String
+  id: String
+}
+
+type userNotifyReturn {
+  success: Boolean
+}
+
+type userNotifySeenReturn {
+  success: Boolean
+  state: userNotifySeenReturnState
+}
+
+type userNotifySeenReturnState {
+  total: Int
+  hasNew: Boolean
+}
+
+type userNotifyState {
+  hasNew: Boolean
+  total: Int
+}
+
+type userPasswordChangeReturn {
+  success: Boolean
+}
+
+type userPasswordCreateReturn {
+  success: Boolean
+}
+
+type userPasswordResetReturn {
+  success: Boolean
+}
+
+type userProfileData {
+  userId: String
+  avatarUrl: String
+  teaserUrl: String
+  alias: String
+  email: String
+  fullName: String
+  description: String
+  lastLogin: String
+  createdAt: String
+  online: Boolean
+  userType: String
+  birthday: String
+  gender: String
+}
+
+type userProfileLoad {
+  success: Boolean
+  params: userProfileParams
+  profile: userProfileData
+  relation: userRelation
+  userId: String
+}
+
+type userProfileParams {
+  notExists: Boolean
+  isPublic: Boolean
+  canView: Boolean
+  isOwen: Boolean
+}
+
+type userRelation {
+  id: String
+  status: String
+  targetId: String
+  sourceId: String
+  relationId: String
+  requestBy: String
+  blockedBy: String
+}
+
+type userRelationAcceptReturn {
+  success: Boolean
+}
+
+type userRelationBlockReturn {
+  success: Boolean
+  relation: userRelation
+}
+
+type userRelationCancelReturn {
+  success: Boolean
+  relationId: String
+  relation: userRelation
+}
+
+type userRelationListReturn {
+  success: Boolean
+  list: JSON
+  total: Int
+}
+
+type userRelationRejectReturn {
+  success: Boolean
+}
+
+type userRelationRequestReturn {
+  success: Boolean
+  relationId: String
+  relation: userRelation
+}
+
+type userRelationStateReturn {
+  success: Boolean
+  relation: userRelation
+}
+
+type userRelationUnblockReturn {
+  success: Boolean
+  relation: userRelation
+}
+
+type userResetTeaserReturn {
+  success: Boolean
+}
+
+type userSettings {
+  public: Boolean
+  searchable: Boolean
+  showEmail: Boolean
+  showFullName: Boolean
+}
+
+input userSettingsInput {
+  public: Boolean!
+  searchable: Boolean!
+  showEmail: Boolean!
+  showFullName: Boolean!
+}
+
+type userUpdateSettingsReturn {
+  success: Boolean
+}
+
+type userUploadAvatarReturn {
+  success: Boolean
+  url: String
+}
+
+type userUploadTeaserReturn {
+  success: Boolean
+  url: String
+}
+
+enum yesNo_enum {
+  YES
+  NO
+}
+

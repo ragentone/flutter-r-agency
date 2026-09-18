@@ -1,0 +1,7 @@
+mutation UserLogin($params:userLoginParams!) {
+    userLogin(params: $params) {
+        success
+        authToken
+        userId
+    }
+}
