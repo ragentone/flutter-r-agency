@@ -1,4 +1,5 @@
 import 'package:app/components/menu.dart';
+import 'package:app/user/components/user_header_trigger.dart';
 import 'package:forui/forui.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,7 +26,7 @@ class HeaderState extends State<Header> {
           ),
           titleAlignment: AlignmentGeometry.centerLeft,
           prefixes: [const MainMenu()],
-          suffixes: [],
+          suffixes: [UserHeaderTrigger()],
         ),
         FDivider(
           style: FDividerStyle(

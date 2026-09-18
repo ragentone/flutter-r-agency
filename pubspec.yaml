@@ -56,6 +56,7 @@ dependencies:
   graphql_codegen: ^3.0.2
   json_serializable: ^6.14.1
   build_runner: ^2.16.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:

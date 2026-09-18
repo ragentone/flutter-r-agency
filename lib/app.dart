@@ -1,4 +1,3 @@
-import 'package:app/aware.dart';
 import 'package:app/router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:forui/forui.dart';
@@ -18,8 +17,6 @@ class RAgency extends StatelessWidget {
         }.contains(defaultTargetPlatform)
         ? (FTheme.neutral.light.touch, FTheme.neutral.dark.touch)
         : (FTheme.neutral.light.desktop, FTheme.neutral.dark.desktop);
-
-    Aware.setContext(context);
 
     return MaterialApp.router(
       supportedLocales: FLocalizations.supportedLocales,
