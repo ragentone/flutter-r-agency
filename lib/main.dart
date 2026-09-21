@@ -19,10 +19,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        FutureProvider(
-          create: (_) => ConfigProvider().load(),
-          initialData: null,
-        ),
+        ChangeNotifierProvider(create: (_) => ConfigProvider()),
         ChangeNotifierProvider(
           create: (_) =>
               UserAuthProvider(service: AuthService(), model: UserModel()),

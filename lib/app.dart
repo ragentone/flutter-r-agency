@@ -1,21 +1,13 @@
-import 'package:app/config/provider/config_provider.dart';
 import 'package:app/router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:forui/forui.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:provider/provider.dart';
 
 class RAgency extends StatelessWidget {
   const RAgency({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ConfigProvider>(context);
-
-    if (!provider.loaded) {
-      return Text('Loading');
-    }
-
     final (lightTheme, darkTheme) =
         const <TargetPlatform>{
           .android,
