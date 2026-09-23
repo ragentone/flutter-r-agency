@@ -13,6 +13,7 @@ import 'package:web_socket_channel/web_socket_channel.dart' as ws;
 import 'broadcast/broadcast_manager.dart';
 import 'callback/websocket_callback.dart';
 import 'channel/websocket_channel.dart';
+import 'models/ws_incoming_message.dart';
 import 'payload/websocket_payload.dart';
 import 'types.dart';
 
@@ -22,6 +23,8 @@ export 'broadcast/types.dart';
 export 'callback/websocket_callback.dart';
 export 'channel/websocket_channel.dart';
 export 'controller/websocket_controller.dart';
+export 'events/ws_event_incoming_message.dart';
+export 'models/ws_incoming_message.dart';
 export 'payload/websocket_payload.dart';
 export 'types.dart';
 
@@ -181,6 +184,8 @@ class WebSocket implements IWebSocket {
       return;
     }
 
+    final message = WsIncomingMessage.fromJson(data);
+
     if (!state.connected) {
       state.connected = true;
       for (final hook in List<WebsocketConnectedFn>.from(_connectedHooks)) {
@@ -188,65 +193,42 @@ class WebSocket implements IWebSocket {
       }
     }
 
-    if (data['ping'] == true) {
+    if (message.isPing) {
       send({'pong': true});
       return;
     }
 
-    if (data['channel'] != null) {
-      final chName = data['channel'].toString();
-      channels[chName]?.dispatch(data);
+    if (message.hasChannel) {
+      channels[message.channel!]?.dispatch(data);
       return;
     }
 
-    if (data['broadcast'] != null && data['action'] != null) {
-      broadcast.dispatch(
-        data['broadcast'].toString(),
-        data['action'].toString(),
-        data,
-      );
+    if (message.hasBroadcast) {
+      broadcast.dispatch(message.broadcast!, message.action.toString(), data);
       return;
     }
 
-    if (data['emits'] != null && data['emits'] is List) {
-      for (final emit in data['emits']) {
-        if (emit is Map) {
-          final eventName = emit['event']?.toString() ?? '';
-
-          if (eventName == 'mesh::websocket:connected') {
-            print('------------------------------------ connected');
-          }
-
-          final payload = (emit['payload'] as Map<String, dynamic>?) ?? {};
-
-          /// @todo
-          events.fire({'event': eventName, 'payload': payload});
-        }
+    if (message.hasEmits) {
+      for (final emit in message.emits!) {
+        final eventName = emit.event;
+        events.fire({'event': eventName, 'payload': emit.payload});
       }
     }
 
-    if (data['controller'] != null && data['controller'] is Map) {
-      final ctrl = data['controller'] as Map;
-      final ctrlId = ctrl['id']?.toString() ?? '';
-      final fn = _ctrlResponse.remove(ctrlId);
+    if (message.hasController) {
+      final ctrl = message.controller!;
+      final fn = _ctrlResponse.remove(ctrl.id);
       if (fn != null) {
-        final result = WsCTRLResult<dynamic>.fromJson(
-          (ctrl['result'] as Map<String, dynamic>?) ?? {},
-        );
-        final info = WsCTRLInfo.fromJson(
-          (ctrl['info'] as Map<String, dynamic>?) ?? {},
-        );
-        fn(result, info);
+        fn(ctrl.result, ctrl.info);
       }
     }
 
-    if (data['callbackId'] != null) {
-      final cbId = data['callbackId'].toString();
-      final cb = _callback.get(cbId);
+    if (message.hasCallback) {
+      final cb = _callback.get(message.callbackId!);
       cb?.call(data);
     }
 
-    events.fire(WsEventIncomingMessage());
+    events.fire(WsEventIncomingMessage(message));
   }
 
   @override
