@@ -10,51 +10,49 @@ class RAgency extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final (lightTheme, darkTheme) =
+        const <TargetPlatform>{
+          .android,
+          .macOS,
+          .iOS,
+          .fuchsia,
+        }.contains(defaultTargetPlatform)
+        ? (FTheme.neutral.light.touch, FTheme.neutral.dark.touch)
+        : (FTheme.neutral.light.desktop, FTheme.neutral.dark.desktop);
+
     final bootstrap = context.watch<Bootstrap>();
 
     if (!bootstrap.isBooted) {
-      MaterialApp(
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
+        supportedLocales: FLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          ...FLocalizations.localizationsDelegates,
+        ],
+        theme: lightTheme.toApproximateMaterialTheme(),
+        darkTheme: darkTheme.toApproximateMaterialTheme(),
         home: Scaffold(
-          body: Center(child: Column(children: [CircularProgressIndicator()])),
+          body: Center(
+            child: CircularProgressIndicator(
+              color: context.theme.colors.foreground,
+            ),
+          ),
+          backgroundColor: context.theme.colors.background,
         ),
       );
     }
 
-    return MaterialApp(
+    return MaterialApp.router(
+      supportedLocales: FLocalizations.supportedLocales,
+      localizationsDelegates: const [...FLocalizations.localizationsDelegates],
+      theme: lightTheme.toApproximateMaterialTheme(),
+      darkTheme: darkTheme.toApproximateMaterialTheme(),
+      routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            children: [
-              Text(bootstrap.config?.config.graphql.url ?? 'is booted'),
-            ],
-          ),
-        ),
+      builder: (context, child) => FTheme(
+        data: lightTheme,
+        child: FToaster(child: FTooltipGroup(child: child!)),
       ),
     );
-
-    // final (lightTheme, darkTheme) =
-    //     const <TargetPlatform>{
-    //       .android,
-    //       .macOS,
-    //       .iOS,
-    //       .fuchsia,
-    //     }.contains(defaultTargetPlatform)
-    //     ? (FTheme.neutral.light.touch, FTheme.neutral.dark.touch)
-    //     : (FTheme.neutral.light.desktop, FTheme.neutral.dark.desktop);
-    //
-    // return MaterialApp.router(
-    //   supportedLocales: FLocalizations.supportedLocales,
-    //   localizationsDelegates: const [...FLocalizations.localizationsDelegates],
-    //   theme: lightTheme.toApproximateMaterialTheme(),
-    //   darkTheme: darkTheme.toApproximateMaterialTheme(),
-    //   routerConfig: appRouter,
-    //   debugShowCheckedModeBanner: false,
-    //   builder: (context, child) => FTheme(
-    //     data: lightTheme,
-    //     child: FToaster(child: FTooltipGroup(child: child!)),
-    //   ),
-    // );
   }
 }

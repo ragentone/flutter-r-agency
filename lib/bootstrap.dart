@@ -1,29 +1,34 @@
 import 'package:app/config/config_response.dart';
 import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
+import 'package:app/user/services/user_auth_service.dart';
 import 'package:app/user/services/user_config_service.dart';
-import 'package:app/user/types.dart';
 import 'package:flutter/foundation.dart';
 
 class Bootstrap extends ChangeNotifier {
   ConfigService configService = ConfigService();
-  UserConfigService userConfigService = UserConfigService();
   GraphQlFactory graphQlFactory = GraphQlFactory();
-
-  UserMetaData? userMetaData;
+  UserConfigService userConfigService = UserConfigService();
+  UserAuthService userAuthService = UserAuthService();
 
   /// variables
-  late String deviceId;
   ConfigResponse? config;
-  bool isLoading = false;
+
+  ValueNotifier isLoading = ValueNotifier<bool>(false);
   bool isBooted = false;
   bool hasError = false;
+
   String? error;
 
   Bootstrap();
 
+  void setLoading(bool loading) {
+    isLoading.value = loading;
+  }
+
   Future<void> boot() async {
-    isLoading = true;
+    isLoading.value = true;
+    isBooted = false;
     error = null;
     notifyListeners();
 
@@ -35,12 +40,16 @@ class Bootstrap extends ChangeNotifier {
 
       await userConfigService.load();
 
+      await Future.delayed(Duration(seconds: 1));
+
       isBooted = true;
+      isLoading.value = false;
+      notifyListeners();
     } catch (e) {
       hasError = true;
       error = e.toString();
     } finally {
-      isLoading = false;
+      isLoading.value = false;
       notifyListeners();
     }
   }

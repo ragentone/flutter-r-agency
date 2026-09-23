@@ -39,20 +39,26 @@ class DefaultPageState extends State<DefaultPage> {
   Widget build(BuildContext context) {
     return FScaffold(
       resizeToAvoidBottomInset: true,
-      child: widget.scrollable
-          ? SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding: EdgeInsets.all(
-                  widget.padding ?? widget.defaultPadding,
+      child: Stack(
+        children: [
+          widget.scrollable
+              ? SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                      widget.padding ?? widget.defaultPadding,
+                    ),
+                    child: widget.body,
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(
+                    widget.padding ?? widget.defaultPadding,
+                  ),
+                  child: widget.body,
                 ),
-                child: widget.body,
-              ),
-            )
-          : Padding(
-              padding: EdgeInsets.all(widget.padding ?? widget.defaultPadding),
-              child: widget.body,
-            ),
+        ],
+      ),
     );
   }
 }

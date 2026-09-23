@@ -1,5 +1,9 @@
+import 'package:app/bootstrap.dart';
 import 'package:app/components/page.dart';
+import 'package:app/user/auth_state.dart';
+import 'package:forui/forui.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 class PageHome extends StatefulWidget {
   const PageHome({super.key});
@@ -16,6 +20,36 @@ class _PageHomeState extends State<PageHome> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultPage(body: Column(children: []));
+    final bootstrap = context.watch<Bootstrap>();
+
+    return DefaultPage(
+      body: ValueListenableBuilder(
+        valueListenable: AuthState.userMate,
+        builder: (ctx, value, child) {
+          if (value == null) {
+            return Center(
+              child: FButton(
+                onPress: () {
+                  bootstrap.userAuthService.login(
+                    'admin@r-agency.org',
+                    '#Nesoqoke001',
+                  );
+                },
+                child: Text('Login'),
+              ),
+            );
+          }
+
+          return Center(
+            child: FButton(
+              onPress: () {
+                bootstrap.userAuthService.logout();
+              },
+              child: Text('Logout'),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
