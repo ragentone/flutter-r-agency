@@ -1,4 +1,4 @@
-import 'package:app/websocket/websocket_client.dart';
+import 'package:app/websocket/websocket.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -123,7 +123,7 @@ void main() {
   group('WebSocketPayload & Controller', () {
     test('builds payload with emits, command, data, and controllers', () {
       final eventBus = EventBus();
-      final client = WebSocketClient(eventBus: eventBus);
+      final client = WebSocket(eventBus: eventBus);
 
       final payload = client.payload()
         ..emit('user::login', {'userId': 123})
@@ -141,7 +141,7 @@ void main() {
   group('BroadcastManager & BaseBroadcast', () {
     test('creates broadcast model and dispatches lifecycle events', () {
       final eventBus = EventBus();
-      final client = WebSocketClient(eventBus: eventBus);
+      final client = WebSocket(eventBus: eventBus);
       final manager = client.broadcast;
 
       bool createdFired = false;
@@ -284,7 +284,7 @@ void main() {
 
   group('WebSocketClient Hooks and Events', () {
     test('modifies payload and executes beforeSend hooks', () {
-      final client = WebSocketClient();
+      final client = WebSocket();
 
       client.onModifyPayload((payload) {
         payload['modified'] = true;
@@ -303,7 +303,7 @@ void main() {
 
     test('manages client logs via EventBus', () async {
       final eventBus = EventBus();
-      final client = WebSocketClient(eventBus: eventBus);
+      final client = WebSocket(eventBus: eventBus);
 
       expect(client.getLogs(), isEmpty);
 

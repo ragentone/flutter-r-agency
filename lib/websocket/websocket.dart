@@ -23,9 +23,9 @@ export 'controller/websocket_controller.dart';
 export 'payload/websocket_payload.dart';
 export 'types.dart';
 
-typedef WebsocketClient = WebSocketClient;
+typedef Websocket = WebSocket;
 
-class WebSocketClient implements IWebSocket {
+class WebSocket implements IWebSocket {
   final _uuid = const Uuid();
   final DeviceId _deviceId = DeviceId();
 
@@ -46,7 +46,7 @@ class WebSocketClient implements IWebSocket {
   final List<WsBeforeSendFn> _beforeSendHooks = [];
   final List<WebsocketConnectedFn> _connectedHooks = [];
 
-  WebSocketClient({EventBus? eventBus}) : events = eventBus ?? EventBus() {
+  WebSocket({EventBus? eventBus}) : events = eventBus ?? EventBus() {
     token = _uuid.v4().replaceAll('-', '') + _uuid.v4().replaceAll('-', '');
     broadcast = BroadcastManager(this);
 
@@ -54,16 +54,19 @@ class WebSocketClient implements IWebSocket {
       final name = event['event']?.toString();
       if (name == 'mesh::client_add_log' && event['log'] != null) {
         final logMap = event['log'] is Map ? (event['log'] as Map) : {};
-        logs.add(WsClientLog(
-          message: logMap['message']?.toString() ?? '',
-          type: logMap['type']?.toString() ?? 'info',
-          payload: logMap['payload'] is Map
-              ? Map<String, dynamic>.from(logMap['payload'] as Map)
-              : const {},
-          key: logMap['key']?.toString(),
-          dateTime: logMap['dateTime']?.toString() ??
-              DateTime.now().toIso8601String(),
-        ));
+        logs.add(
+          WsClientLog(
+            message: logMap['message']?.toString() ?? '',
+            type: logMap['type']?.toString() ?? 'info',
+            payload: logMap['payload'] is Map
+                ? Map<String, dynamic>.from(logMap['payload'] as Map)
+                : const {},
+            key: logMap['key']?.toString(),
+            dateTime:
+                logMap['dateTime']?.toString() ??
+                DateTime.now().toIso8601String(),
+          ),
+        );
       } else if (name == 'mesh::client_clear_logs') {
         logs.clear();
       } else if (name == 'mesh::client_initialize' && event['token'] != null) {
@@ -78,6 +81,7 @@ class WebSocketClient implements IWebSocket {
   List<WsClientLog> getLogs() => logs;
 
   void onModifyPayload(WsModifyPayloadFn fn) => _modifyPayloadHooks.add(fn);
+
   void onBeforeSend(WsBeforeSendFn fn) => _beforeSendHooks.add(fn);
 
   WebSocketChannel channel(String ch) {
@@ -112,7 +116,8 @@ class WebSocketClient implements IWebSocket {
     } else if (config is String) {
       wsUrl = config;
     } else if (config is Map) {
-      wsUrl = config['websocket']?['url']?.toString() ??
+      wsUrl =
+          config['websocket']?['url']?.toString() ??
           config['url']?.toString() ??
           '';
     }
@@ -144,10 +149,7 @@ class WebSocketClient implements IWebSocket {
         },
         onError: (error) {
           state.connected = false;
-          events.fire({
-            'event': 'websocket:error',
-            'error': error.toString(),
-          });
+          events.fire({'event': 'websocket:error', 'error': error.toString()});
         },
         onDone: () {
           state.connected = false;
@@ -159,10 +161,7 @@ class WebSocketClient implements IWebSocket {
       );
     } catch (e) {
       state.connected = false;
-      events.fire({
-        'event': 'websocket:error',
-        'error': e.toString(),
-      });
+      events.fire({'event': 'websocket:error', 'error': e.toString()});
     }
   }
 
@@ -203,10 +202,7 @@ class WebSocketClient implements IWebSocket {
     }
 
     if (data['ping'] == true) {
-      events.fire({
-        'event': 'websocket:ping',
-        'message': data,
-      });
+      events.fire({'event': 'websocket:ping', 'message': data});
       send({'pong': true});
       return;
     }
@@ -231,10 +227,7 @@ class WebSocketClient implements IWebSocket {
         if (emit is Map) {
           final eventName = emit['event']?.toString() ?? '';
           final payload = (emit['payload'] as Map<String, dynamic>?) ?? {};
-          events.fire({
-            'event': eventName,
-            'payload': payload,
-          });
+          events.fire({'event': eventName, 'payload': payload});
         }
       }
     }
@@ -260,10 +253,7 @@ class WebSocketClient implements IWebSocket {
       cb?.call(data);
     }
 
-    events.fire({
-      'event': 'websocket:incoming:message',
-      'message': data,
-    });
+    events.fire({'event': 'websocket:incoming:message', 'message': data});
   }
 
   @override
@@ -273,20 +263,14 @@ class WebSocketClient implements IWebSocket {
     _socket?.sink.close();
     _socket = null;
     state.connected = false;
-    events.fire({
-      'event': 'websocket:disconnected',
-      'state': state.toJson(),
-    });
+    events.fire({'event': 'websocket:disconnected', 'state': state.toJson()});
   }
 
   @override
   void emit(String event, [dynamic payload]) {
     send({
       'emits': [
-        {
-          'event': event,
-          'payload': ?payload,
-        }
+        {'event': event, 'payload': ?payload},
       ],
       'requestId': _uuid.v4().replaceAll('-', ''),
     });
@@ -309,10 +293,7 @@ class WebSocketClient implements IWebSocket {
   void send(Map<String, dynamic> payload) {
     Map<String, dynamic> data = Map<String, dynamic>.from(payload);
 
-    data.putIfAbsent(
-      'requestId',
-      () => _uuid.v4().replaceAll('-', ''),
-    );
+    data.putIfAbsent('requestId', () => _uuid.v4().replaceAll('-', ''));
 
     if (data.containsKey('callbackFn')) {
       final fn = data.remove('callbackFn');
@@ -351,10 +332,7 @@ class WebSocketClient implements IWebSocket {
       final encoded = utf8.encode(jsonEncode(data));
       _socket?.sink.add(Uint8List.fromList(encoded));
     } catch (e) {
-      events.fire({
-        'event': 'websocket:error',
-        'error': e.toString(),
-      });
+      events.fire({'event': 'websocket:error', 'error': e.toString()});
     }
   }
 }

@@ -43,7 +43,21 @@ class _PageHomeState extends State<PageHome> {
           return Center(
             child: FButton(
               onPress: () {
-                bootstrap.userAuthService.logout();
+                //bootstrap.userAuthService.logout();
+                bootstrap.websocket
+                    .payload()
+                    .controller('developer')
+                    .action(
+                      'test',
+                      data: {},
+                      onResponse: (response, info) {
+                        print(response);
+                        print(info.executed);
+                        print(info.hrtime);
+                        print(info.errors?.first.toString());
+                      },
+                    )
+                    .send();
               },
               child: Text('Logout'),
             ),
