@@ -1,9 +1,8 @@
-import 'package:app/bootstrap/bootstrap.dart';
 import 'package:app/theme/const.dart';
 import 'package:app/user/services/user_auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserLoginForm extends StatefulWidget {
   const UserLoginForm({super.key});
@@ -15,8 +14,12 @@ class UserLoginForm extends StatefulWidget {
 class _State extends State<UserLoginForm> {
   final _form = GlobalKey<FormState>();
   final UserAuthService _authService = UserAuthService();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController(
+    text: dotenv.get('DEV_USER_EMAIL'),
+  );
+  final TextEditingController _password = TextEditingController(
+    text: dotenv.get('DEV_USER_PASSWORD'),
+  );
 
   Future<void> _submit(BuildContext context) async {
     final bool valid = _form.currentState?.validate() ?? false;
@@ -49,9 +52,7 @@ class _State extends State<UserLoginForm> {
                   ),
                   FDivider(),
                   FButton(
-                    onPress: () {
-                      _submit(context);
-                    },
+                    onPress: busy ? null : () => _submit(context),
                     child: Row(
                       spacing: 6.0,
                       crossAxisAlignment: CrossAxisAlignment.center,
