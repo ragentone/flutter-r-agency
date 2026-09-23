@@ -47,7 +47,7 @@ class RAgency extends StatelessWidget {
       localizationsDelegates: const [...FLocalizations.localizationsDelegates],
       theme: lightTheme.toApproximateMaterialTheme(),
       darkTheme: darkTheme.toApproximateMaterialTheme(),
-      routerConfig: appRouter,
+      routerConfig: bootstrap.router.instance,
       debugShowCheckedModeBanner: false,
       builder: (context, child) => FTheme(
         data: lightTheme,

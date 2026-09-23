@@ -1,3 +1,5 @@
+import 'package:app/components/footer.dart';
+import 'package:app/components/header.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
@@ -38,6 +40,8 @@ class DefaultPageState extends State<DefaultPage> {
   @override
   Widget build(BuildContext context) {
     return FScaffold(
+      header: Header(),
+      footer: Footer(),
       resizeToAvoidBottomInset: true,
       child: Stack(
         children: [
