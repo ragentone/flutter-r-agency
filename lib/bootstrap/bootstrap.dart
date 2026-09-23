@@ -1,3 +1,4 @@
+import 'package:app/bootstrap/event_bus_service.dart';
 import 'package:app/config/config_response.dart';
 import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
@@ -6,8 +7,15 @@ import 'package:app/user/services/user_config_service.dart';
 import 'package:app/websocket/websocket_client.dart';
 import 'package:flutter/foundation.dart';
 
+class BootstrapBootedEvent {
+  late final ConfigResponse config;
+
+  BootstrapBootedEvent({required this.config});
+}
+
 class Bootstrap extends ChangeNotifier {
   ConfigService configService = ConfigService();
+  EventBusService eventBusService = EventBusService();
   GraphQlFactory graphQlFactory = GraphQlFactory();
   UserConfigService userConfigService = UserConfigService();
   UserAuthService userAuthService = UserAuthService();
@@ -44,6 +52,8 @@ class Bootstrap extends ChangeNotifier {
       await userConfigService.load();
 
       await Future.delayed(Duration(seconds: 1));
+
+      eventBusService.bus.fire(BootstrapBootedEvent(config: config!));
 
       isBooted = true;
       isLoading.value = false;
