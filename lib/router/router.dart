@@ -27,12 +27,15 @@ class Router {
       refreshListenable: AuthState.userMate,
       redirect: (context, state) async {
         final meta = RouteMeta.from(state.metadata);
-        final bool authS = AuthState.userMate.value != null;
-        final bool authT = meta.access == RouteMetaAccess.auth;
+        final bool authorized = AuthState.userMate.value != null;
+        final bool authRoute = meta.access == RouteMetaAccess.auth;
+        final bool nonAuthRoute = meta.access == RouteMetaAccess.nonAuth;
 
+        if (nonAuthRoute && authorized) {
+          return '/';
+        }
 
-
-        if (authT && !authS) {
+        if (authRoute && !authorized) {
           return routePathUserAuth;
         }
 

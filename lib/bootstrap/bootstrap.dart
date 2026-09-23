@@ -52,8 +52,6 @@ class Bootstrap extends ChangeNotifier {
 
       await Future.delayed(Duration(seconds: 1));
 
-      eventBusService.bus.fire(BootstrapBootedEvent(config: config!));
-
       isBooted = true;
       notifyListeners();
     } catch (e) {
