@@ -4,7 +4,9 @@ import 'dart:typed_data';
 
 import 'package:app/config/config_response.dart';
 import 'package:app/device/device_id.dart';
+import 'package:app/websocket/events/ws_event_incoming_message.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart' as ws;
 
@@ -45,6 +47,8 @@ class WebSocket implements IWebSocket {
   final List<WsModifyPayloadFn> _modifyPayloadHooks = [];
   final List<WsBeforeSendFn> _beforeSendHooks = [];
   final List<WebsocketConnectedFn> _connectedHooks = [];
+
+  final ValueNotifier ready = ValueNotifier<bool>(false);
 
   WebSocket({EventBus? eventBus}) : events = eventBus ?? EventBus() {
     token = _uuid.v4().replaceAll('-', '') + _uuid.v4().replaceAll('-', '');
@@ -133,12 +137,6 @@ class WebSocket implements IWebSocket {
       },
     );
 
-    events.fire({
-      'event': 'websocket:before:connect',
-      'clientId': clientId,
-      'url': uri.toString(),
-    });
-
     try {
       _subscription?.cancel();
       _socket = ws.WebSocketChannel.connect(uri);
@@ -149,19 +147,13 @@ class WebSocket implements IWebSocket {
         },
         onError: (error) {
           state.connected = false;
-          events.fire({'event': 'websocket:error', 'error': error.toString()});
         },
         onDone: () {
           state.connected = false;
-          events.fire({
-            'event': 'websocket:disconnected',
-            'state': state.toJson(),
-          });
         },
       );
     } catch (e) {
       state.connected = false;
-      events.fire({'event': 'websocket:error', 'error': e.toString()});
     }
   }
 
@@ -191,18 +183,12 @@ class WebSocket implements IWebSocket {
 
     if (!state.connected) {
       state.connected = true;
-      events.fire({
-        'event': 'websocket:connected',
-        'client': this,
-        'state': state.toJson(),
-      });
       for (final hook in List<WebsocketConnectedFn>.from(_connectedHooks)) {
         hook(true);
       }
     }
 
     if (data['ping'] == true) {
-      events.fire({'event': 'websocket:ping', 'message': data});
       send({'pong': true});
       return;
     }
@@ -226,7 +212,14 @@ class WebSocket implements IWebSocket {
       for (final emit in data['emits']) {
         if (emit is Map) {
           final eventName = emit['event']?.toString() ?? '';
+
+          if (eventName == 'mesh::websocket:connected') {
+            print('------------------------------------ connected');
+          }
+
           final payload = (emit['payload'] as Map<String, dynamic>?) ?? {};
+
+          /// @todo
           events.fire({'event': eventName, 'payload': payload});
         }
       }
@@ -253,7 +246,7 @@ class WebSocket implements IWebSocket {
       cb?.call(data);
     }
 
-    events.fire({'event': 'websocket:incoming:message', 'message': data});
+    events.fire(WsEventIncomingMessage());
   }
 
   @override
