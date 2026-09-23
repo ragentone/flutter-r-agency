@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthToken {
   final String _key = 'app_user_auth_token';
-  final String _emptyToken = '_xxx_xxx_xxx_xxx_';
+  final String _emptyToken = '_xxx_xxx_xxx_xxx_xxx_xxx_';
 
   Future<String> get() async {
     final storage = await SharedPreferences.getInstance();

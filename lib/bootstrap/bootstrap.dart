@@ -3,7 +3,6 @@ import 'package:app/config/config_response.dart';
 import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
 import 'package:app/router/router.dart';
-import 'package:app/user/services/user_auth_service.dart';
 import 'package:app/user/services/user_config_service.dart';
 import 'package:app/websocket/websocket.dart';
 import 'package:flutter/foundation.dart';
@@ -19,7 +18,6 @@ class Bootstrap extends ChangeNotifier {
   EventBusService eventBusService = EventBusService();
   GraphQlFactory graphQlFactory = GraphQlFactory();
   UserConfigService userConfigService = UserConfigService();
-  UserAuthService userAuthService = UserAuthService();
   Websocket websocket = Websocket();
   Router router = Router();
 

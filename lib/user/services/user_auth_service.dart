@@ -14,12 +14,15 @@ class UserAuthService {
   final GraphQlFactory _graphQlFactory = GraphQlFactory();
 
   final ValueNotifier isBusy = ValueNotifier<bool>(false);
+  final ValueNotifier isLoginFail = ValueNotifier<bool>(false);
+  final ValueNotifier isLogoutFail = ValueNotifier<bool>(false);
 
   Future<void> login(String email, String password) async {
     if (isBusy.value) {
       return;
     }
 
+    isLoginFail.value = false;
     isBusy.value = true;
 
     final client = await _graphQlFactory.create();
@@ -30,7 +33,8 @@ class UserAuthService {
       ),
     );
 
-    final token = result.parsedData?.userLogin?.authToken;
+    final bool success = result.parsedData?.userLogin?.success ?? false;
+    final String? token = result.parsedData?.userLogin?.authToken;
 
     if (token == null) {
       await authToken.destroy();
@@ -39,6 +43,9 @@ class UserAuthService {
       await configService.load();
     }
 
+    await Future.delayed(Duration(seconds: 1));
+
+    isLoginFail.value = !success;
     isBusy.value = false;
   }
 
@@ -47,6 +54,7 @@ class UserAuthService {
       return;
     }
 
+    isLogoutFail.value = false;
     isBusy.value = true;
     final client = await _graphQlFactory.create();
     final result = await client.query$UserLogout();
@@ -57,6 +65,7 @@ class UserAuthService {
       await authToken.destroy();
     }
 
+    isLogoutFail.value = !success;
     isBusy.value = false;
   }
 }
