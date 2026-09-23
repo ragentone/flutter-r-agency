@@ -21,7 +21,5 @@ class UserConfigService {
     if (userMeta != null) {
       await _authState.setUserMeta(userMeta);
     }
-
-    print(result.data);
   }
 }

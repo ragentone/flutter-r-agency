@@ -48,6 +48,9 @@ class Bootstrap extends ChangeNotifier {
 
       graphQlFactory.boot(config!);
       websocketClient.boot(config!);
+      websocketClient.payload().callback((data) {
+        print(data);
+      }).send();
 
       await userConfigService.load();
 
