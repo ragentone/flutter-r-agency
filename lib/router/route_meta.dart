@@ -4,91 +4,50 @@ enum RouteMetaAccess { auth, nonAuth, always }
 
 /// Typed route metadata object for GoRouter routes.
 class RouteMeta extends MapView<String, dynamic> {
-  final bool authorization;
-  final String? title;
-  final List<String> roles;
-  final List<String> permissions;
-  final bool guestOnly;
-  final Map<String, dynamic> extra;
   final RouteMetaAccess access;
+  final String? title;
 
   RouteMeta({
-    this.authorization = false,
-    this.title,
-    this.roles = const [],
-    this.permissions = const [],
-    this.guestOnly = false,
-    this.extra = const {},
     this.access = RouteMetaAccess.always,
+    this.title,
   }) : super(
          _buildMap(
-           authorization: authorization,
+           access: access,
            title: title,
-           roles: roles,
-           permissions: permissions,
-           guestOnly: guestOnly,
-           extra: extra,
          ),
        );
 
   /// Shorthand constructor for routes requiring authorization.
-  factory RouteMeta.auth({
-    String? title,
-    List<String> roles = const [],
-    List<String> permissions = const [],
-    Map<String, dynamic> extra = const {},
-  }) {
+  factory RouteMeta.auth({String? title}) {
     return RouteMeta(
-      authorization: true,
+      access: RouteMetaAccess.auth,
       title: title,
-      roles: roles,
-      permissions: permissions,
-      extra: extra,
     );
   }
 
-  /// Shorthand constructor for public routes.
-  factory RouteMeta.public({
-    String? title,
-    Map<String, dynamic> extra = const {},
-  }) {
-    return RouteMeta(authorization: false, title: title, extra: extra);
-  }
-
-  /// Shorthand constructor for routes accessible only by unauthenticated guests.
-  factory RouteMeta.guest({
-    String? title,
-    Map<String, dynamic> extra = const {},
-  }) {
+  /// Shorthand constructor for routes accessible only when not authenticated.
+  factory RouteMeta.nonAuth({String? title}) {
     return RouteMeta(
-      authorization: false,
-      guestOnly: true,
+      access: RouteMetaAccess.nonAuth,
       title: title,
-      extra: extra,
     );
   }
 
-  /// Alias for [authorization].
-  bool get requiresAuth => authorization;
-
-  /// Whether this route is public (does not require authorization and is not guest-only).
-  bool get isPublic => !authorization && !guestOnly;
+  /// Shorthand constructor for routes always accessible.
+  factory RouteMeta.always({String? title}) {
+    return RouteMeta(
+      access: RouteMetaAccess.always,
+      title: title,
+    );
+  }
 
   static Map<String, dynamic> _buildMap({
-    required bool authorization,
+    required RouteMetaAccess access,
     String? title,
-    required List<String> roles,
-    required List<String> permissions,
-    required bool guestOnly,
-    required Map<String, dynamic> extra,
   }) {
     return {
-      'authorization': authorization,
+      'access': access,
       'title': ?title,
-      if (roles.isNotEmpty) 'roles': roles,
-      if (permissions.isNotEmpty) 'permissions': permissions,
-      if (guestOnly) 'guestOnly': guestOnly,
-      ...extra,
     };
   }
 
@@ -98,41 +57,24 @@ class RouteMeta extends MapView<String, dynamic> {
       return RouteMeta();
     }
 
-    final bool auth =
-        map['authorization'] == true ||
-        map['requiresAuth'] == true ||
-        map['auth'] == true;
+    RouteMetaAccess access = RouteMetaAccess.always;
+    final rawAccess = map['access'];
+    if (rawAccess is RouteMetaAccess) {
+      access = rawAccess;
+    } else if (rawAccess is String) {
+      for (final value in RouteMetaAccess.values) {
+        if (value.name.toLowerCase() == rawAccess.toLowerCase()) {
+          access = value;
+          break;
+        }
+      }
+    }
 
     final String? title = map['title']?.toString();
 
-    final List<String> roles = [];
-    if (map['roles'] is List) {
-      roles.addAll((map['roles'] as List).map((e) => e.toString()));
-    }
-
-    final List<String> permissions = [];
-    if (map['permissions'] is List) {
-      permissions.addAll((map['permissions'] as List).map((e) => e.toString()));
-    }
-
-    final bool guestOnly = map['guestOnly'] == true;
-
-    final extra = Map<String, dynamic>.from(map)
-      ..remove('authorization')
-      ..remove('requiresAuth')
-      ..remove('auth')
-      ..remove('title')
-      ..remove('roles')
-      ..remove('permissions')
-      ..remove('guestOnly');
-
     return RouteMeta(
-      authorization: auth,
+      access: access,
       title: title,
-      roles: roles,
-      permissions: permissions,
-      guestOnly: guestOnly,
-      extra: extra,
     );
   }
 
@@ -160,20 +102,12 @@ class RouteMeta extends MapView<String, dynamic> {
   Map<String, dynamic> toJson() => toMap();
 
   RouteMeta copyWith({
-    bool? authorization,
+    RouteMetaAccess? access,
     String? title,
-    List<String> roles = const [],
-    List<String> permissions = const [],
-    bool? guestOnly,
-    Map<String, dynamic>? extra,
   }) {
     return RouteMeta(
-      authorization: authorization ?? this.authorization,
+      access: access ?? this.access,
       title: title ?? this.title,
-      roles: roles.isNotEmpty ? roles : this.roles,
-      permissions: permissions.isNotEmpty ? permissions : this.permissions,
-      guestOnly: guestOnly ?? this.guestOnly,
-      extra: extra ?? this.extra,
     );
   }
 }

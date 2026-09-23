@@ -30,6 +30,8 @@ class Router {
         final bool authS = AuthState.userMate.value != null;
         final bool authT = meta.access == RouteMetaAccess.auth;
 
+
+
         if (authT && !authS) {
           return routePathUserAuth;
         }
