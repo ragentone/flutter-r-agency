@@ -1,16 +1,17 @@
 import 'dart:convert';
 
 import 'package:app/config/config_response.dart';
-import 'package:app/device/device_id.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-class ConfigManager {
-  static ConfigResponse? config;
-  static late String backendUrl;
+import '../device/device_id.dart';
 
-  static Future<void> loadEnv() async {
+class ConfigService {
+  static ConfigResponse? config;
+  late String backendUrl;
+
+  Future<void> loadEnv() async {
     await dotenv.load(fileName: ".env");
 
     if (kReleaseMode) {
@@ -22,9 +23,13 @@ class ConfigManager {
     backendUrl = dotenv.get('BACKEND_URL');
   }
 
-  static Future<ConfigResponse> load() async {
-    final deviceId = await DeviceIdManager.getOrCreateDeviceId();
+  Future<ConfigResponse> load() async {
+    final deviceId = await DeviceId().get();
     final url = Uri.parse(backendUrl);
+
+    print(deviceId);
+    print(url.toString());
+
     final response = await http.post(
       url,
       headers: {

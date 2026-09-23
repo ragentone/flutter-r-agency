@@ -1,10 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-class DeviceIdManager {
-  static const _key = 'app_unique_device_id';
+class DeviceId {
+  final String _key = 'app_unique_device_id';
 
-  static Future<String> getOrCreateDeviceId() async {
+  Future<String> get() async {
     final storage = await SharedPreferences.getInstance();
     String? existingId = storage.getString(_key);
 

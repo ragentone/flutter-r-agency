@@ -1,17 +1,23 @@
-import 'package:app/config/config_manager.dart';
+import 'package:app/config/config_response.dart';
 import 'package:app/device/device_id.dart';
-import 'package:app/user/services/user_auth_service.dart';
+import 'package:app/user/auth_token.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class GraphQlFactory {
-  static Future<GraphQLClient> create() async {
-    final config = ConfigManager.config;
+  static final DeviceId _deviceId = DeviceId();
+  static final AuthToken _authToken = AuthToken();
+  static late ConfigResponse _config;
 
+  void boot(ConfigResponse config) {
+    _config = config;
+  }
+
+  Future<GraphQLClient> create() async {
     final httpLink = HttpLink(
-      config?.config.graphql.url ?? 'http://localhost:5000/graphl',
+      _config.config.graphql.url,
       defaultHeaders: {
-        'x-device-id': await DeviceIdManager.getOrCreateDeviceId(),
-        'x-auth-token': ?await UserAuthService.getAuthToken(),
+        'x-device-id': await _deviceId.get(),
+        'x-auth-token': await _authToken.get(),
       },
     );
     final cache = GraphQLCache(store: InMemoryStore());
