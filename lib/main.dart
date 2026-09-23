@@ -1,4 +1,4 @@
-import 'package:app/bootstrap.dart';
+import 'package:app/bootstrap/bootstrap.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 

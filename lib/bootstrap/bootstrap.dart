@@ -3,6 +3,7 @@ import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
 import 'package:app/user/services/user_auth_service.dart';
 import 'package:app/user/services/user_config_service.dart';
+import 'package:app/websocket/websocket_client.dart';
 import 'package:flutter/foundation.dart';
 
 class Bootstrap extends ChangeNotifier {
@@ -10,6 +11,7 @@ class Bootstrap extends ChangeNotifier {
   GraphQlFactory graphQlFactory = GraphQlFactory();
   UserConfigService userConfigService = UserConfigService();
   UserAuthService userAuthService = UserAuthService();
+  WebsocketClient websocketClient = WebsocketClient();
 
   /// variables
   ConfigResponse? config;
@@ -37,6 +39,7 @@ class Bootstrap extends ChangeNotifier {
       config = await configService.load();
 
       graphQlFactory.boot(config!);
+      websocketClient.boot(config!);
 
       await userConfigService.load();
 

@@ -1,4 +1,4 @@
-import 'package:app/bootstrap.dart';
+import 'package:app/bootstrap/bootstrap.dart';
 import 'package:app/components/page.dart';
 import 'package:app/user/auth_state.dart';
 import 'package:forui/forui.dart';
