@@ -9,17 +9,17 @@ import '../pages/page_home.dart';
 final List<RouteBase> appRoutes = [
   GoRoute(
     path: '/',
-    builder: (context, state) => PageHome(),
+    pageBuilder: (context, state) => NoTransitionPage(child: PageHome()),
     metadata: RouteMeta(access: RouteMetaAccess.always),
   ),
   GoRoute(
     path: routePathUserAuth,
-    builder: (context, state) => PageUserAuth(),
+    pageBuilder: (ctx, state) => NoTransitionPage(child: PageUserAuth()),
     metadata: RouteMeta(access: RouteMetaAccess.nonAuth),
   ),
   GoRoute(
     path: routePathUserAccount,
-    builder: (context, state) => PageUserAccount(),
+    pageBuilder: (context, state) => NoTransitionPage(child: PageUserAccount()),
     metadata: RouteMeta(access: RouteMetaAccess.auth),
   ),
 ];
