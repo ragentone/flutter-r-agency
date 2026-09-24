@@ -76,6 +76,7 @@ class PeerConfig {
   final String host;
   final String path;
   final bool secure;
+  final String peerId;
   final PeerToken token;
 
   PeerConfig({
@@ -83,6 +84,7 @@ class PeerConfig {
     required this.host,
     required this.path,
     required this.secure,
+    required this.peerId,
     required this.token,
   });
 
@@ -92,6 +94,7 @@ class PeerConfig {
       host: json['host'] as String,
       path: json['path'] as String,
       secure: json['secure'] as bool,
+      peerId: json['peerId'] as String,
       token: PeerToken.fromJson(json['token'] as Map<String, dynamic>),
     );
   }
@@ -99,11 +102,15 @@ class PeerConfig {
 
 class PeerToken {
   final String clientId;
+  final String deviceId;
 
-  PeerToken({required this.clientId});
+  PeerToken({required this.clientId, required this.deviceId});
 
   factory PeerToken.fromJson(Map<String, dynamic> json) {
-    return PeerToken(clientId: json['clientId'] as String);
+    return PeerToken(
+      clientId: json['clientId'] as String,
+      deviceId: json['deviceId'] as String,
+    );
   }
 }
 

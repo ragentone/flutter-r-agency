@@ -1,3 +1,5 @@
+import 'package:app/phone/pages/page_phone.dart';
+import 'package:app/phone/phone_const.dart';
 import 'package:app/router/route_meta.dart';
 import 'package:app/user/const.dart';
 import 'package:app/user/pages/page_user_account.dart';
@@ -20,6 +22,11 @@ final List<RouteBase> appRoutes = [
   GoRoute(
     path: routePathUserAccount,
     pageBuilder: (context, state) => NoTransitionPage(child: PageUserAccount()),
+    metadata: RouteMeta(access: RouteMetaAccess.auth),
+  ),
+  GoRoute(
+    path: routePathPhone,
+    pageBuilder: (context, state) => NoTransitionPage(child: PagePhone()),
     metadata: RouteMeta(access: RouteMetaAccess.auth),
   ),
 ];

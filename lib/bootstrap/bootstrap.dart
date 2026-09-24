@@ -2,6 +2,7 @@ import 'package:app/bootstrap/event_bus_service.dart';
 import 'package:app/config/config_response.dart';
 import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
+import 'package:app/phone/phone_service.dart';
 import 'package:app/router/const.dart';
 import 'package:app/router/router.dart';
 import 'package:app/theme/theme_service.dart';
@@ -22,6 +23,7 @@ class Bootstrap extends ChangeNotifier {
   ThemeService themeService = ThemeService();
   UserConfigService userConfigService = UserConfigService();
   Websocket websocket = Websocket();
+  PhoneService phoneService = PhoneService();
   Router router = Router();
 
   /// variables
@@ -48,6 +50,8 @@ class Bootstrap extends ChangeNotifier {
       graphQlFactory.boot(config!);
 
       websocket.boot(config!);
+
+      await phoneService.boot(config!, websocket);
 
       await userConfigService.load();
 
