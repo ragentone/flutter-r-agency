@@ -1,4 +1,5 @@
 import 'package:app/bootstrap/bootstrap.dart';
+import 'package:app/theme/theme_toggle_button.dart';
 import 'package:app/user/auth_state.dart';
 import 'package:app/user/const.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _State extends State<Header> {
             ),
           ],
           suffixes: [
+            const ThemeToggleButton(),
             ValueListenableBuilder(
               valueListenable: AuthState.userMate,
               builder: (ctx, value, child) {

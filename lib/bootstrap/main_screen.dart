@@ -1,4 +1,5 @@
 import 'package:app/bootstrap/bootstrap.dart';
+import 'package:app/theme/theme_state.dart';
 import 'package:forui/forui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -22,17 +23,34 @@ class _State extends State<MainScreen> {
   Widget build(BuildContext context) {
     final bootstrap = context.read<Bootstrap>();
 
-    return MaterialApp.router(
-      supportedLocales: FLocalizations.supportedLocales,
-      localizationsDelegates: const [...FLocalizations.localizationsDelegates],
-      theme: widget.lightTheme.toApproximateMaterialTheme(),
-      darkTheme: widget.darkTheme.toApproximateMaterialTheme(),
-      routerConfig: bootstrap.router.instance,
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) => FTheme(
-        data: widget.lightTheme,
-        child: FToaster(child: FTooltipGroup(child: child!)),
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeState.mode,
+      builder: (context, mode, child) {
+        return MaterialApp.router(
+          supportedLocales: FLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            ...FLocalizations.localizationsDelegates,
+          ],
+          theme: widget.lightTheme.toApproximateMaterialTheme(),
+          darkTheme: widget.darkTheme.toApproximateMaterialTheme(),
+          themeMode: mode,
+          routerConfig: bootstrap.router.instance,
+          debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            final isDark = switch (mode) {
+              ThemeMode.dark => true,
+              ThemeMode.light => false,
+              ThemeMode.system =>
+                MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+            };
+
+            return FTheme(
+              data: isDark ? widget.darkTheme : widget.lightTheme,
+              child: FToaster(child: FTooltipGroup(child: child!)),
+            );
+          },
+        );
+      },
     );
   }
 }

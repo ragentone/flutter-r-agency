@@ -4,6 +4,7 @@ import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
 import 'package:app/router/const.dart';
 import 'package:app/router/router.dart';
+import 'package:app/theme/theme_service.dart';
 import 'package:app/user/services/user_config_service.dart';
 import 'package:app/websocket/websocket.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +19,7 @@ class Bootstrap extends ChangeNotifier {
   ConfigService configService = ConfigService();
   EventBusService eventBusService = EventBusService();
   GraphQlFactory graphQlFactory = GraphQlFactory();
+  ThemeService themeService = ThemeService();
   UserConfigService userConfigService = UserConfigService();
   Websocket websocket = Websocket();
   Router router = Router();
@@ -38,6 +40,8 @@ class Bootstrap extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await themeService.load();
+
       await configService.loadEnv();
       config = await configService.load();
 
