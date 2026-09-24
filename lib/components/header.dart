@@ -43,7 +43,7 @@ class _State extends State<Header> {
           titleAlignment: .centerLeft,
           prefixes: [
             GestureDetector(
-              child: Image.asset('assets/images/logo.png', width: 32.0),
+              child: Image.asset('assets/images/logo.png', width: 42.0),
               onTap: () => bootstrap.goHome(),
             ),
           ],
