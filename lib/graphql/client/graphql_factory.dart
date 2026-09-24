@@ -22,8 +22,23 @@ class GraphQlFactory {
     );
     final cache = GraphQLCache(store: InMemoryStore());
 
+    final ErrorLink errorLink = ErrorLink(
+      onException: (request, forward, exception) {
+        print('GraphQL Error: $exception');
+        forward(request);
+        return null;
+      },
+      onGraphQLError: (request, forward, exception) {
+        print('GraphQL Error: $exception');
+        forward(request);
+        return null;
+      },
+    );
+
+    final link = Link.from([errorLink, httpLink]);
+
     return GraphQLClient(
-      link: httpLink,
+      link: link,
       cache: cache,
       defaultPolicies: DefaultPolicies(
         query: Policies(fetch: FetchPolicy.cacheAndNetwork),

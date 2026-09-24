@@ -2,6 +2,7 @@ import 'package:app/bootstrap/event_bus_service.dart';
 import 'package:app/config/config_response.dart';
 import 'package:app/config/config_service.dart';
 import 'package:app/graphql/client/graphql_factory.dart';
+import 'package:app/router/const.dart';
 import 'package:app/router/router.dart';
 import 'package:app/user/services/user_config_service.dart';
 import 'package:app/websocket/websocket.dart';
@@ -58,5 +59,16 @@ class Bootstrap extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  void goHome() {
+    go(routePathHome);
+  }
+
+  void go(String path) {
+    if (router.instance.state.path == path) {
+      return;
+    }
+    router.instance.go(path);
   }
 }

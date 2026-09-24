@@ -3,6 +3,7 @@ import 'package:app/user/services/user_auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:validatorless/validatorless.dart';
 
 class UserLoginForm extends StatefulWidget {
   const UserLoginForm({super.key});
@@ -42,12 +43,17 @@ class _State extends State<UserLoginForm> {
                   FTextFormField.email(
                     label: Text('Email - Address'),
                     control: FTextFieldControl.managed(controller: _email),
+                    validator: Validatorless.multiple([
+                      Validatorless.required('Email address required'),
+                      Validatorless.email('Invalid email address'),
+                    ]),
                     enabled: !busy,
                   ),
                   const SizedBox(height: 10),
                   FTextFormField.password(
                     label: Text('Password'),
                     control: FTextFieldControl.managed(controller: _password),
+                    validator: Validatorless.required('Password required'),
                     enabled: !busy,
                   ),
                   FDivider(),
