@@ -1,5 +1,4 @@
 import 'package:app/bootstrap/bootstrap.dart';
-import 'package:app/phone/phone_call_overlay.dart';
 import 'package:app/theme/theme_state.dart';
 import 'package:forui/forui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -49,11 +48,7 @@ class _State extends State<MainScreen> {
             return FTheme(
               data: isDark ? widget.darkTheme : widget.lightTheme,
               child: FToaster(
-                child: FTooltipGroup(
-                  child: Stack(
-                    children: [child!, const PhoneCallOverlay()],
-                  ),
-                ),
+                child: FTooltipGroup(child: Stack(children: [child!])),
               ),
             );
           },
