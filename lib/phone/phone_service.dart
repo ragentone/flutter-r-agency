@@ -5,9 +5,14 @@ import 'package:app/phone/phone_state.dart';
 import 'package:app/phone/phone_types.dart';
 import 'package:app/websocket/websocket.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:peerdart/peerdart.dart';
 
 const String _wsController = 'phone_v1';
+
+const Map<String, dynamic> _iceServersConfig = {
+  'iceServers': [
+    {'urls': 'stun:stun.l.google.com:19302'},
+  ],
+};
 
 class PhoneService {
   static final PhoneService _instance = PhoneService._internal();
@@ -17,11 +22,11 @@ class PhoneService {
   PhoneService._internal();
 
   Websocket? _websocket;
-  Peer? _peer;
-  MediaConnection? _mediaConnection;
+  RTCPeerConnection? _pc;
   MediaStream? _localStream;
   bool _renderersReady = false;
-  String? _expectedIncomingCallId;
+  bool _remoteDescriptionSet = false;
+  final List<RTCIceCandidate> _pendingCandidates = [];
 
   final RTCVideoRenderer localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer remoteRenderer = RTCVideoRenderer();
@@ -34,21 +39,6 @@ class PhoneService {
       await remoteRenderer.initialize();
       _renderersReady = true;
     }
-
-    final peerConfig = config.config.peer;
-    _peer?.dispose();
-    _peer = Peer(
-      id: peerConfig.peerId,
-      options: PeerOptions(
-        host: peerConfig.host,
-        port: peerConfig.port,
-        path: peerConfig.path,
-        secure: peerConfig.secure,
-        token: peerConfig.token.deviceId,
-      ),
-    );
-
-    _peer!.on<MediaConnection>('call').listen(_onIncomingMediaConnection);
 
     websocket.events.on<Map>().listen(_onWsEvent);
   }
@@ -75,6 +65,9 @@ class PhoneService {
       case 'phone::call_ended':
         _handleCallEnded(PhoneCallEnded.fromJson(payload));
         break;
+      case 'phone::signal':
+        _handleSignal(payload);
+        break;
     }
   }
 
@@ -83,7 +76,6 @@ class PhoneService {
       return;
     }
 
-    _expectedIncomingCallId = call.callId;
     PhoneState.call.value = PhoneCallSnapshot(
       status: PhoneCallStatus.ringing,
       callId: call.callId,
@@ -105,9 +97,20 @@ class PhoneService {
 
     try {
       final stream = await _openLocalMedia(current.callType);
-      final connection = _peer!.call(payload.peerDeviceId, stream);
-      _mediaConnection = connection;
-      _wireMediaConnection(connection);
+      final pc = await _createPeerConnection(current.callId!);
+      _pc = pc;
+
+      for (final track in stream.getTracks()) {
+        await pc.addTrack(track, stream);
+      }
+
+      final offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      _sendSignal(current.callId!, 'offer', {
+        'sdp': offer.sdp,
+        'type': offer.type,
+      });
+
       PhoneState.call.value = current.copyWith(status: PhoneCallStatus.inCall);
     } catch (_) {
       end();
@@ -121,31 +124,140 @@ class PhoneService {
     _teardown();
   }
 
-  Future<void> _onIncomingMediaConnection(MediaConnection connection) async {
+  Future<void> _handleSignal(Map<String, dynamic> payload) async {
     final current = PhoneState.call.value;
-    if (_expectedIncomingCallId == null ||
-        current.status != PhoneCallStatus.ringing) {
-      connection.dispose();
+    if (current.callId == null || current.callId != payload['callId']) {
       return;
     }
 
-    _mediaConnection = connection;
-    _wireMediaConnection(connection);
+    final signal = payload['signal'];
+    if (signal is! Map) {
+      return;
+    }
+
+    final kind = signal['kind']?.toString();
+    final data = signal['payload'];
+    if (data is! Map) {
+      return;
+    }
+    final signalPayload = Map<String, dynamic>.from(data);
+
+    switch (kind) {
+      case 'offer':
+        await _handleOffer(current, signalPayload);
+        break;
+      case 'answer':
+        await _handleAnswer(signalPayload);
+        break;
+      case 'candidate':
+        await _handleCandidate(signalPayload);
+        break;
+    }
+  }
+
+  Future<void> _handleOffer(
+    PhoneCallSnapshot current,
+    Map<String, dynamic> payload,
+  ) async {
+    if (current.callId == null) {
+      return;
+    }
 
     try {
       final stream = await _openLocalMedia(current.callType);
-      connection.answer(stream);
+      final pc = await _createPeerConnection(current.callId!);
+      _pc = pc;
+
+      for (final track in stream.getTracks()) {
+        await pc.addTrack(track, stream);
+      }
+
+      await pc.setRemoteDescription(
+        RTCSessionDescription(payload['sdp'], payload['type']),
+      );
+      await _flushPendingCandidates();
+
+      final answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      _sendSignal(current.callId!, 'answer', {
+        'sdp': answer.sdp,
+        'type': answer.type,
+      });
+
       PhoneState.call.value = current.copyWith(status: PhoneCallStatus.inCall);
     } catch (_) {
       end();
     }
   }
 
-  void _wireMediaConnection(MediaConnection connection) {
-    connection.on<MediaStream>('stream').listen((stream) {
-      remoteRenderer.srcObject = stream;
-    });
-    connection.on('close').listen((_) => _teardown());
+  Future<void> _handleAnswer(Map<String, dynamic> payload) async {
+    final pc = _pc;
+    if (pc == null) {
+      return;
+    }
+    await pc.setRemoteDescription(
+      RTCSessionDescription(payload['sdp'], payload['type']),
+    );
+    await _flushPendingCandidates();
+  }
+
+  Future<void> _handleCandidate(Map<String, dynamic> payload) async {
+    final candidate = RTCIceCandidate(
+      payload['candidate']?.toString(),
+      payload['sdpMid']?.toString(),
+      payload['sdpMLineIndex'] as int?,
+    );
+
+    if (_pc == null || !_remoteDescriptionSet) {
+      _pendingCandidates.add(candidate);
+      return;
+    }
+    await _pc!.addCandidate(candidate);
+  }
+
+  Future<void> _flushPendingCandidates() async {
+    _remoteDescriptionSet = true;
+    final pc = _pc;
+    if (pc == null) {
+      return;
+    }
+    for (final candidate in _pendingCandidates) {
+      await pc.addCandidate(candidate);
+    }
+    _pendingCandidates.clear();
+  }
+
+  Future<RTCPeerConnection> _createPeerConnection(String callId) async {
+    final pc = await createPeerConnection(_iceServersConfig);
+
+    pc.onTrack = (event) {
+      if (event.streams.isNotEmpty) {
+        remoteRenderer.srcObject = event.streams.first;
+      }
+    };
+
+    pc.onIceCandidate = (candidate) {
+      if (candidate.candidate == null) {
+        return;
+      }
+      _sendSignal(callId, 'candidate', candidate.toMap());
+    };
+
+    return pc;
+  }
+
+  void _sendSignal(String callId, String kind, Map<String, dynamic> payload) {
+    _websocket!
+        .payload()
+        .controller(_wsController)
+        .action(
+          'signal',
+          data: {
+            'callId': callId,
+            'signal': {'kind': kind, 'payload': payload},
+          },
+        )
+        .send();
   }
 
   Future<MediaStream> _openLocalMedia(PhoneCallType type) async {
@@ -296,10 +408,15 @@ class PhoneService {
   }
 
   void _teardown() {
-    _expectedIncomingCallId = null;
+    _pendingCandidates.clear();
+    _remoteDescriptionSet = false;
 
-    _mediaConnection?.dispose();
-    _mediaConnection = null;
+    final pc = _pc;
+    _pc = null;
+    if (pc != null) {
+      pc.close();
+      pc.dispose();
+    }
 
     final stream = _localStream;
     _localStream = null;
